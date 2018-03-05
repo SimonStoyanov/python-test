@@ -97,4 +97,6 @@ cv2.imshow('Normal', img)
 cv2.imshow('Kernel 1', ApplyKernel(img, kernel1))
 cv2.imshow('Kernel 2', ApplyKernel(img, kernel2))
 
-k = cv2.waitKey(0)
+k = cv2.waitKey(1) & 0xFF
+if k == 27:
+    cv2.destroyAllWindows()
