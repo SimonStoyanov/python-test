@@ -46,7 +46,7 @@ def PrintMatrix(matrix):
         for x in range(0, rows):
             print matrix[y,x]
 
-img = cv2.imread('Ex_Images/ricalin.png',0)
+img = cv2.imread('Ex_Images/test.png',0)
 
 kernel = np.array(3*[3*[1.0/9.0]])
 
@@ -54,49 +54,73 @@ def getFilteredValue(img, kernel, i, j):
     value = 0
     imgx,imgy = img.shape
     kx,ky = kernel.shape
+    print "Filtered"
     for ix in range (-(kx/2),kx/2 +1):
         for iy in range (-(ky/2),ky/2 +1):
+            print "Loop"
+            print "i+ix "+str(i+ix)
+            print "ix "+str(ix)
+            print "imgx "+str(imgx)
+            print "j+iy "+str(j+iy)
+            print "iy "+str(iy)
+            print "imgy "+str(imgy)
+            
             if(i+ix>=0 and i+ix < imgx and j+iy >=0 and j+ iy < imgy):
                 value = value + img[i+ix][j+iy]*kernel[ix][iy]
+                print "Value! "+str(value)
     return value
 
 def strechValue(value, minV, maxV, strechValue = 255):
     return ((value - minV)/(maxV - minV))*(strechValue)
 
-def copyImg(mat, img):
-    img_x, img_y = img.shape
-    for x in range(0, img_x):
-        for y in range(0, img_y):
-            mat[x][y] = img[x][y]
-
-def ApplyKernel(img_to_apply, kernel):
-    min_val = GetMinElementMatrix(img_to_apply)
-    max_val = GetMaxElementMatrix(img_to_apply)
-    cols, rows = img_to_apply.shape
-    new_img = np.zeros(img_to_apply.shape)
-    copyImg(new_img, img_to_apply)
+def toAbs(matrix):
+    cols, rows = matrix.shape
     for i in range(0,cols):
         for j in range(0,rows):
-            new_img[i][j] = getFilteredValue(new_img,kernel,i,j)
+            matrix[i][j] = abs(matrix[i][j])
+            
+def ApplyKernel(img_to_apply, kernel):
+    print "Image"
+    print img_to_apply
+    cols, rows = img_to_apply.shape
+    new_img = np.zeros(img_to_apply.shape, np.float)
+    for i in range(0,cols):
+        for j in range(0,rows):
+            new_img[i][j] = getFilteredValue(img_to_apply,kernel,i,j)
+
+    print "Without Abs"
+    print new_img
+
+    toAbs(new_img)
+
     min_val = GetMinElementMatrix(new_img)
     max_val = GetMaxElementMatrix(new_img)
-
-    print min_val
-    print max_val
+    
+    print "Abs"
+    print new_img
     
     for i in range(0,cols):
         for j in range(0,rows):
             new_img[i][j] = strechValue(new_img[i][j], min_val, max_val)
+
+    print "Normalized"
+    print new_img
 
     return new_img
 
 kernel1 = np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]])
 kernel2 = np.array([[-1, -2, -1], [0, 0, 0], [1, 2, 1]])
 
-cv2.imshow('Normal', img)
-cv2.imshow('Kernel 1', ApplyKernel(img, kernel1))
-cv2.imshow('Kernel 2', ApplyKernel(img, kernel2))
+img2 = ApplyKernel(img, kernel1)
+img3 = ApplyKernel(img, kernel2)
 
-k = cv2.waitKey(1) & 0xFF
+cv2.imshow('Normal', img)
+cv2.imshow('Kernel 1', img2)
+cv2.imshow('Kernel 2', img3)
+
+k = cv2.waitKey(0)
+
 if k == 27:
+    # Wait for ESC key to exit
     cv2.destroyAllWindows()
+
